@@ -30,8 +30,13 @@ def cities_list(q: str = Query(description="Название города", defa
     """
     Получение списка городов
     """
-    cities = Session().query(City).all()
+    cities = Session().query(City)
+    # После определения переменной "cities", добавьте фильтрацию по аргументу "q".
+    if q is not None:
+        # Используйте .filter() для выполнения фильтрации по части имени города.
+        cities = cities.filter(City.name.ilike(f"%{q}%"))
 
+    # Затем выполните запрос и верните результат как список словарей.
     return [{'id': city.id, 'name': city.name, 'weather': city.weather} for city in cities]
 
 
