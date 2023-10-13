@@ -129,10 +129,29 @@ def picnic_add(city_id: int = None, datetime: dt.datetime = None):
 
 
 @app.get('/picnic-register/', summary='Picnic Registration', tags=['picnic'])
-def register_to_picnic(*_, **__,):
+def register_to_picnic(picnic_id: int, user_id: int):
     """
     Регистрация пользователя на пикник
-    (Этот эндпойнт необходимо реализовать в процессе выполнения тестового задания)
     """
-    # TODO: Сделать логику
-    return ...
+    # Проверяем, существуют ли picnic_id и user_id
+    picnic = Session().query(Picnic).filter(Picnic.id == picnic_id).first()
+    user = Session().query(User).filter(User.id == user_id).first()
+
+    if not picnic:
+        raise HTTPException(status_code=404, detail=f'Пикник с ID {picnic_id} не найден')
+
+    if not user:
+        raise HTTPException(status_code=404, detail=f'Пользователь с ID {user_id} не найден')
+
+    # Регистрируем пользователя на пикник
+    registration = PicnicRegistration(picnic_id=picnic_id, user_id=user_id)
+    s = Session()
+    s.add(registration)
+    s.commit()
+
+    return {
+        'registration_id': registration.id,
+        'user_name': user.name,
+        'picnic_id': picnic.id,
+        'picnic_time': picnic.time,
+    }
