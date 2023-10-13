@@ -105,6 +105,17 @@ def all_picnics(datetime: dt.datetime = Query(default=None, description='Вре�
 
 @app.get('/picnic-add/', summary='Picnic Add', tags=['picnic'])
 def picnic_add(city_id: int = None, datetime: dt.datetime = None):
+    """
+    Создание пикника
+    """
+    if city_id is None or datetime is None:
+        raise HTTPException(status_code=400, detail='city_id и datetime должны быть указаны.')
+
+    # Проверка существования города
+    city = Session().query(City).filter(City.id == city_id).first()
+    if not city:
+        raise HTTPException(status_code=400, detail='Город с указанным city_id не существует.')
+
     p = Picnic(city_id=city_id, time=datetime)
     s = Session()
     s.add(p)
@@ -112,7 +123,7 @@ def picnic_add(city_id: int = None, datetime: dt.datetime = None):
 
     return {
         'id': p.id,
-        'city': Session().query(City).filter(City.id == p.id).first().name,
+        'city': city.name,
         'time': p.time,
     }
 
